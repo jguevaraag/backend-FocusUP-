@@ -1,5 +1,7 @@
 package com.focusup.backend.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,12 +26,12 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager; //Comprobador de credenciales.
+    private AuthenticationManager authenticationManager; // Comprobador de credenciales.
 
     @Autowired
     private JwtService jwtService;
 
-        @Autowired
+    @Autowired
     private UsuariRepository usuariRepository;
 
     @Autowired
@@ -69,16 +71,16 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         // Comprueba usuario y contraseñas.
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        
         if (authentication.isAuthenticated()) {
-            // Generamos el Token JWT.
             String token = jwtService.generateToken(request.getUsername());
-            return ResponseEntity.ok(token); // Devolvemos el "sello"
+
+            // Aqui devolvemos el token en formato JSON.
+            return ResponseEntity.ok(Map.of("token", token));
         } else {
-            return ResponseEntity.badRequest().body("Credenciales incorrectas");
+           //Devolvemos un error si las credenciales son incorrectas.
+            return ResponseEntity.badRequest().body(Map.of("error", "Credenciales incorrectas"));
         }
     }
 }
