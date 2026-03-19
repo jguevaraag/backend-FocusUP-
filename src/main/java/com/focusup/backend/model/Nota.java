@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,5 +32,6 @@ public class Nota {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuari_id", nullable = false)
+    @JsonIgnore
     private Usuari usuari;
 }

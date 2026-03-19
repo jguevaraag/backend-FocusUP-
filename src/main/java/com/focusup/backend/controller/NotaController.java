@@ -6,6 +6,7 @@ import com.focusup.backend.model.Usuari;
 import com.focusup.backend.repository.NotaRepository;
 import com.focusup.backend.repository.UsuariRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,21 @@ public class NotaController {
         // Devolvemos solo SUS notas.
         List<Nota> notas = notaRepository.findByUsuariId(usuario.getId());
         return ResponseEntity.ok(notas);
+    }
+
+    @GetMapping("/date/{fecha}")
+    public ResponseEntity<List<Nota>> obtenerNotasPorFecha(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+            Principal principal) {
+        
+        
+        Usuari usuario = usuariRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        
+        List<Nota> notasDelDia = notaRepository.findByDataAndUsuariId(fecha, usuario.getId());
+        
+        return ResponseEntity.ok(notasDelDia);
     }
 
     @PostMapping
