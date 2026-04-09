@@ -19,6 +19,7 @@ public class Recordatori {
     @Column(name = "data_hora")
     private LocalDateTime dataHora; 
     
+    @Column(name = "completat")
     private boolean completat = false;
 
     @ManyToOne(fetch = FetchType.LAZY)

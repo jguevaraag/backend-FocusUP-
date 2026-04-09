@@ -7,4 +7,5 @@ import java.time.LocalDateTime;
 public class RecordatoriRequest {
     private String missatge;
     private LocalDateTime dataHora; 
+    private boolean completat;
 }
