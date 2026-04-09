@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -45,16 +47,19 @@ public class BotigaController {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
-        Optional<Inventari> inventariExistente = inventariRepository.findByUsuariIdAndItemId(usuari.getId(),
-                item.getId());
+        Optional<Inventari> inventariExistente = inventariRepository.findByUsuariIdAndItemId(usuari.getId(), item.getId());
+        
         if (inventariExistente.isPresent()) {
-            return ResponseEntity.badRequest().body("Error: Ya tienes este item en tu inventario");
+            // Devolvemos un JSON de error
+            return ResponseEntity.badRequest().body(Map.of("error", "Ya tienes este item en tu inventario"));
         }
 
         if (usuari.getPunts() < item.getPreu()) {
-            return ResponseEntity.badRequest().body("Error: No tienes suficientes puntos para comprar este item");
+            // Devolvemos un JSON de error
+            return ResponseEntity.badRequest().body(Map.of("error", "No tienes suficientes puntos para comprar este item"));
         }
 
+        // Transacción
         usuari.setPunts(usuari.getPunts() - item.getPreu());
         usuariRepository.save(usuari);
 
@@ -64,6 +69,12 @@ public class BotigaController {
         nuevoInventari.setDataCompra(LocalDateTime.now());
         nuevoInventari.setEquipado(false);
         inventariRepository.save(nuevoInventari);
-        return ResponseEntity.ok("Item comprado correctamente");
+
+        // AQUÍ LA MAGIA: Le devolvemos un mensaje y el nuevo saldo en un JSON
+        Map<String, Object> response = new HashMap<>();
+        response.put("mensaje", "Item comprado correctamente");
+        response.put("nouSaldo", usuari.getPunts());
+
+        return ResponseEntity.ok(response);
     }
 }
