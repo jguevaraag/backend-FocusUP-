@@ -14,4 +14,7 @@ public interface RecordatoriRepository extends JpaRepository<Recordatori, Long> 
     List<Recordatori> findByUsuari(Usuari usuari);
     
     List<Recordatori> findByUsuariAndDataHoraBetween(Usuari usuari, LocalDateTime start, LocalDateTime end);
+
+    // NUEVO: Busca tareas cuya hora ya pasó (Before), que NO estén hechas (CompletatFalse) y NO tengan multa (PenalitzatFalse)
+    List<Recordatori> findByDataHoraBeforeAndCompletatFalseAndPenalitzatFalse(LocalDateTime data);
 }

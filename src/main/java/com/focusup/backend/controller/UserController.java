@@ -4,6 +4,7 @@ import com.focusup.backend.dto.ActualitzarPerfilRequest;
 import com.focusup.backend.model.Usuari;
 import com.focusup.backend.repository.UsuariRepository;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-    @Autowired
+@Autowired
     private UsuariRepository usuariRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // NUEVO: Necesario para la contraseña
+    private PasswordEncoder passwordEncoder;
 
-    // 1. VER PERFIL
+    // 1. VER PERFIL + MOTOR DE RACHAS INVISIBLE 🔥
     @GetMapping("/me")
     public ResponseEntity<?> obtenerPerfil() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -33,10 +33,37 @@ public class UserController {
         Usuari usuari = usuariRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        // --- LÓGICA DE RACHAS (STREAKS) ---
+        LocalDate hoy = LocalDate.now();
+        LocalDate ultima = usuari.getUltimaConnexio();
+        boolean rachaActualizada = false;
+
+        if (ultima == null) {
+            // Primer día usando la app
+            usuari.setRachaActual(1);
+            usuari.setUltimaConnexio(hoy);
+            rachaActualizada = true;
+        } else if (ultima.equals(hoy.minusDays(1))) {
+            // Entró ayer. ¡Mantiene la racha!
+            usuari.setRachaActual(usuari.getRachaActual() + 1);
+            usuari.setUltimaConnexio(hoy);
+            rachaActualizada = true;
+        } else if (ultima.isBefore(hoy.minusDays(1))) {
+            // Pasó más de un día sin entrar. Perdió la racha :(
+            usuari.setRachaActual(1);
+            usuari.setUltimaConnexio(hoy);
+            rachaActualizada = true;
+        }
+        // Si ultima.equals(hoy), ya entró hoy, no hacemos nada.
+
+        if (rachaActualizada) {
+            usuari = usuariRepository.save(usuari);
+        }
+
         return ResponseEntity.ok(usuari);
     }
 
-    // 2. ACTUALIZAR NOMBRE Y APELLIDOS (El que ya tenías)
+    // 2. ACTUALIZAR NOMBRE Y APELLIDOS
     @PutMapping("/me")
     public ResponseEntity<?> actualizarPerfil(@RequestBody ActualitzarPerfilRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -52,7 +79,7 @@ public class UserController {
         return ResponseEntity.ok(usuarioActualizado);
     }
 
-    // 3. ACTUALIZAR EMAIL (NUEVO)
+    // 3. ACTUALIZAR EMAIL
     @PatchMapping("/me/email")
     public ResponseEntity<?> actualizarEmail(@RequestBody Map<String, String> request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -61,9 +88,9 @@ public class UserController {
 
         String nuevoEmail = request.get("email");
 
-        // Comprobamos que el email no esté ya siendo usado por otra persona
+        // Comprobamos que el email no esté ya siendo usado por otra persona (Tu versión optimizada)
         boolean usuarioExistente = usuariRepository.existsByEmail(nuevoEmail);
-        if (usuarioExistente == true) {
+        if (usuarioExistente) {
             return ResponseEntity.badRequest().body(Map.of("error", "Este correo electrónico ya está en uso."));
         }
 
@@ -73,7 +100,7 @@ public class UserController {
         return ResponseEntity.ok(Map.of("mensaje", "Correo electrónico actualizado correctamente."));
     }
 
-    // 4. ACTUALIZAR CONTRASEÑA (NUEVO)
+    // 4. ACTUALIZAR CONTRASEÑA
     @PatchMapping("/me/password")
     public ResponseEntity<?> actualizarPassword(@RequestBody Map<String, String> request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

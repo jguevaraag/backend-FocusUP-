@@ -48,6 +48,12 @@ public class Usuari implements UserDetails {
     @Column(name = "data_ultima_ruleta")
     private LocalDate dataUltimaRuleta;
 
+    @Column(name = "racha_actual")
+    private Integer rachaActual = 0;
+
+    @Column(name = "ultima_connexio")
+    private LocalDate ultimaConnexio;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         

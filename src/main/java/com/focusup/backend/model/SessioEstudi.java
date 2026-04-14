@@ -39,4 +39,8 @@ public class SessioEstudi {
     @JoinColumn(name = "usuari_id", nullable = false)
     private Usuari usuari;
 
+    @ManyToOne
+    @JoinColumn(name = "recordatori_id")
+    private Recordatori recordatori;
+
 }
