@@ -17,4 +17,6 @@ public interface RecordatoriRepository extends JpaRepository<Recordatori, Long> 
 
     // NUEVO: Busca tareas cuya hora ya pasó (Before), que NO estén hechas (CompletatFalse) y NO tengan multa (PenalitzatFalse)
     List<Recordatori> findByDataHoraBeforeAndCompletatFalseAndPenalitzatFalse(LocalDateTime data);
+
+    long countByUsuariAndCompletatTrue(Usuari usuari);
 }

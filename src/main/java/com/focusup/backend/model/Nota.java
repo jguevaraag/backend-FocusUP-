@@ -34,4 +34,8 @@ public class Nota {
     @JoinColumn(name = "usuari_id", nullable = false)
     @JsonIgnore
     private Usuari usuari;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sessio_id")
+    private SessioEstudi sessioEstudi;
 }

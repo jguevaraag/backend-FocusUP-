@@ -1,7 +1,10 @@
 package com.focusup.backend.controller;
 
 import com.focusup.backend.dto.ActualitzarPerfilRequest;
+import com.focusup.backend.dto.UserStatsDTO;
 import com.focusup.backend.model.Usuari;
+import com.focusup.backend.repository.RecordatoriRepository;
+import com.focusup.backend.repository.SessioEstudiRepository;
 import com.focusup.backend.repository.UsuariRepository;
 
 import java.time.LocalDate;
@@ -23,6 +26,12 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SessioEstudiRepository sessioRepository; // <-- Añade este Autowired arriba en la clase
+
+    @Autowired
+    private RecordatoriRepository recordatoriRepository;
 
     // 1. VER PERFIL + MOTOR DE RACHAS INVISIBLE 🔥
     @GetMapping("/me")
@@ -120,5 +129,28 @@ public class UserController {
         usuariRepository.save(usuari);
 
         return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada de forma segura."));
+    }
+
+    @GetMapping("/me/stats")
+    public ResponseEntity<UserStatsDTO> obtenerEstadisticas() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Usuari usuari = usuariRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        
+        Integer totalMinutos = sessioRepository.sumarMinutosPorUsuario(usuari.getId());
+
+       
+        long tareasHechas = recordatoriRepository.countByUsuariAndCompletatTrue(usuari);
+
+        
+        UserStatsDTO stats = new UserStatsDTO(
+                totalMinutos,
+                tareasHechas,
+                usuari.getRachaActual(),
+                usuari.getPunts()
+        );
+
+        return ResponseEntity.ok(stats);
     }
 }

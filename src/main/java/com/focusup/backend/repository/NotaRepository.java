@@ -13,4 +13,6 @@ public interface NotaRepository extends JpaRepository<Nota, Long> {
     List<Nota> findByUsuariId(Long usuariId);
 
     List<Nota> findByDataAndUsuariId(LocalDate data, Long usuariId);
+
+    boolean existsBySessioEstudiId(Long sessioId);
 }
