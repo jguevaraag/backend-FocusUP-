@@ -7,6 +7,7 @@ import com.focusup.backend.model.GrupUsuari;
 import com.focusup.backend.model.Usuari;
 import com.focusup.backend.repository.GrupRepository;
 import com.focusup.backend.repository.GrupUsuariRepository;
+import com.focusup.backend.repository.SessioEstudiRepository;
 import com.focusup.backend.repository.UsuariRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,9 @@ public class GrupController {
 
     @Autowired
     private UsuariRepository usuariRepository;
+
+    @Autowired
+    private SessioEstudiRepository sessioRepository;
 
     // Helper para sacar el usuario actual
     private Usuari getUsuarioActual() {
@@ -135,5 +139,26 @@ public class GrupController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(ranking);
+    }
+
+    @GetMapping("/{grupId}/stats")
+    public ResponseEntity<?> obtenerEstadisticasGrupo(@PathVariable Long grupId) {
+        Usuari usuariActual = getUsuarioActual();
+
+        // 1. Seguridad: Solo los miembros del grupo pueden ver estos datos
+        if (!grupUsuariRepository.existsByUsuariAndGrupId(usuariActual, grupId)) {
+            return ResponseEntity.status(403).body(Map.of("error", "No tienes permiso para ver las estadísticas de este grupo"));
+        }
+
+        // 2. Calculamos el total de minutos de todo el equipo
+        Integer minutosTotales = sessioRepository.sumarMinutosTotalesDelGrupo(grupId);
+
+        // Opcional: Podríais definir la "Meta" aquí, o dejar que el frontend la decida.
+        int metaSemanal = 1000; 
+
+        return ResponseEntity.ok(Map.of(
+                "minutos_estudiados_grupo", minutosTotales,
+                "meta_semanal", metaSemanal
+        ));
     }
 }

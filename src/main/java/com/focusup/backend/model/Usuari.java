@@ -54,6 +54,12 @@ public class Usuari implements UserDetails {
     @Column(name = "ultima_connexio")
     private LocalDate ultimaConnexio;
 
+    @Column(name = "intentos_fallidos")
+    private int intentosFallidos = 0;
+
+    @Column(name = "bloqueado")
+    private boolean bloqueado = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         

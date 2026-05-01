@@ -13,4 +13,7 @@ public interface SessioEstudiRepository extends JpaRepository<SessioEstudi, Long
 
     @Query("SELECT COALESCE(SUM(s.duracioMinuts), 0) FROM SessioEstudi s WHERE s.usuari.id = :usuariId")
     Integer sumarMinutosPorUsuario(@Param("usuariId") Long usuariId);
+
+    @Query("SELECT COALESCE(SUM(s.duracioMinuts), 0) FROM SessioEstudi s WHERE s.usuari.id IN (SELECT gu.usuari.id FROM GrupUsuari gu WHERE gu.grup.id = :grupId)")
+    Integer sumarMinutosTotalesDelGrupo(@Param("grupId") Long grupId);
 }

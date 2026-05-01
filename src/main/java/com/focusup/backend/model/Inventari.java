@@ -21,7 +21,7 @@ public class Inventari {
     @Column(name = "data_compra")
     private LocalDateTime dataCompra;
 
-
+    @Column(name = "equipado")
     private Boolean equipado = false; 
 
 

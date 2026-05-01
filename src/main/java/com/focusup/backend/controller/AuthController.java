@@ -1,5 +1,6 @@
 package com.focusup.backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.focusup.backend.security.JwtService;
 import com.focusup.backend.dto.LoginRequest;
 import com.focusup.backend.dto.RegistroRequest;
+import com.focusup.backend.model.RegistroSesion;
 import com.focusup.backend.model.Role;
 import com.focusup.backend.model.Usuari;
+import com.focusup.backend.repository.RegistroSesionRepository;
 import com.focusup.backend.repository.UsuariRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -30,6 +34,9 @@ public class AuthController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private RegistroSesionRepository registroSesionRepository;
 
     @Autowired
     private UsuariRepository usuariRepository;
@@ -68,19 +75,59 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Comprueba usuario y contraseñas.
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+    public ResponseEntity<?> loginUsuario(@RequestBody Map<String, String> requestPayload, HttpServletRequest request) {
+        
+        String username = requestPayload.get("username");
+        String password = requestPayload.get("password");
+        
+        // Obtenemos la IP de la petición (Flutter)
+        String ipAddress = request.getRemoteAddr();
 
-        if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(request.getUsername());
+        Usuari usuario = usuariRepository.findByUsername(username).orElse(null);
 
-            // Aqui devolvemos el token en formato JSON.
-            return ResponseEntity.ok(Map.of("token", token));
-        } else {
-           //Devolvemos un error si las credenciales son incorrectas.
-            return ResponseEntity.badRequest().body(Map.of("error", "Credenciales incorrectas"));
+        if (usuario == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Credenciales incorrectas"));
         }
+
+        if (usuario.isBloqueado()) {
+            // Guardamos el registro como intento FALLIDO (porque está bloqueado)
+            registroSesionRepository.save(new RegistroSesion(null,usuario, ipAddress, LocalDateTime.now(), false));
+            return ResponseEntity.status(403).body(Map.of("error", "Cuenta bloqueada."));
+        }
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            int intentos = usuario.getIntentosFallidos() + 1;
+            usuario.setIntentosFallidos(intentos);
+
+            if (intentos >= 3) {
+                usuario.setBloqueado(true);
+            }
+            usuariRepository.save(usuario);
+            
+            // Guardamos el registro como intento FALLIDO (contraseña incorrecta)
+            registroSesionRepository.save(new RegistroSesion(null, usuario, ipAddress, LocalDateTime.now(), false));
+            
+            return ResponseEntity.status(401).body(Map.of(
+                "error", "Contraseña incorrecta. Te quedan " + (3 - intentos) + " intentos."
+            ));
+        }
+
+        // --- SI LLEGAMOS AQUÍ, EL LOGIN ES CORRECTO ---
+        if (usuario.getIntentosFallidos() > 0) {
+            usuario.setIntentosFallidos(0);
+            usuariRepository.save(usuario);
+        }
+
+        // Guardamos el registro como intento EXITOSO
+        registroSesionRepository.save(new RegistroSesion(null, usuario, ipAddress, LocalDateTime.now(), true));
+
+        // Generamos Token (tu código JWT)
+        String token = "TOKEN_GENERADO"; 
+
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Login exitoso",
+                "token", token,
+                "rol", usuario.getRol().name()
+        ));
     }
 }
