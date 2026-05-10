@@ -31,17 +31,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        String userEmail = null; // IMPORTANTE: Le quitamos el 'final' para poder usarlo en el try-catch
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // 1. Bloqueamos el caso de que Flutter envíe "Bearer null" por error
+        if (authHeader == null || !authHeader.startsWith("Bearer ") || authHeader.equals("Bearer null")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         jwt = authHeader.substring(7);
 
-        userEmail = jwtService.extractUsername(jwt);
+        // 2. Envolvemos la extracción en un try-catch para que no explote (Error 500) si el token es basura
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            System.out.println("⚠️ Token JWT ignorado por ser inválido o estar malformado: " + e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
+        // 3. Continuamos con la validación normal si todo ha ido bien
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
