@@ -122,7 +122,7 @@ public class AuthController {
         registroSesionRepository.save(new RegistroSesion(null, usuario, ipAddress, LocalDateTime.now(), true));
 
         // Generamos Token (tu código JWT)
-        String token = "TOKEN_GENERADO"; 
+        String token = jwtService.generateToken(usuario.getUsername()); 
 
         return ResponseEntity.ok(Map.of(
                 "mensaje", "Login exitoso",
