@@ -19,4 +19,6 @@ public interface RecordatoriRepository extends JpaRepository<Recordatori, Long> 
     List<Recordatori> findByDataHoraBeforeAndCompletatFalseAndPenalitzatFalse(LocalDateTime data);
 
     long countByUsuariAndCompletatTrue(Usuari usuari);
+
+    List<Recordatori> findByGrupId(Long grupId);
 }

@@ -38,4 +38,10 @@ public class Nota {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sessio_id")
     private SessioEstudi sessioEstudi;
+
+        @ManyToOne
+    @JoinColumn(name = "grup_id")
+    @JsonIgnore // Evita recursión
+    private Grup grup;
+    
 }

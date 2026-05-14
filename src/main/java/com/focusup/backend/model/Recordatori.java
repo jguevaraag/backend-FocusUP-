@@ -30,4 +30,10 @@ public class Recordatori {
     @JoinColumn(name = "usuari_id", nullable = false)
     @JsonIgnore
     private Usuari usuari;
+
+        @ManyToOne
+    @JoinColumn(name = "grup_id")
+    @JsonIgnore // Evita recursión
+    private Grup grup;
+    
 }
