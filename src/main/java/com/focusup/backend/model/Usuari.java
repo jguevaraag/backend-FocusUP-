@@ -9,10 +9,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <--- ESTO EVITA EL ERROR 500
 @Data // Genera getters, setters, toString, etc. automáticamente
 @NoArgsConstructor // Constructor vacío (necesario para JPA)
 @AllArgsConstructor // Constructor con todos los argumentos

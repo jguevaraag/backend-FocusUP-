@@ -1,8 +1,13 @@
 package com.focusup.backend.model;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <--- ESTO EVITA EL ERROR 500
 @Entity
 @Table(name = "grups")
 @Data
@@ -16,4 +21,7 @@ public class Grup {
 
     @Column(name = "codi_acces", unique = true)
     private String codiAcces;
+
+    @OneToMany(mappedBy = "grup")
+    private List<GrupUsuari> miembros;
 }

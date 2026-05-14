@@ -2,10 +2,14 @@ package com.focusup.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "grup_usuaris")
 @Data
@@ -14,14 +18,15 @@ public class GrupUsuari {
     @EmbeddedId
     private GrupUsuariID id = new GrupUsuariID();
 
+    @ToString.Exclude   
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("grupId") // Conecta con la clave compuesta
     @JoinColumn(name = "grup_id")
     private Grup grup;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("usuariId") // Conecta con la clave compuesta
     @JoinColumn(name = "usuari_id")
     private Usuari usuari;
