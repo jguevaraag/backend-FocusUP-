@@ -20,16 +20,15 @@ public class CastigoService {
     @Autowired
     private UsuariRepository usuariRepository;
 
-    // Se ejecuta cada día a las 00:00 exactas
     @Scheduled(cron = "0 0 0 * * *")
     public void aplicarCastigoNocturno() {
         LocalDateTime ahora = LocalDateTime.now();
 
-        // 1. Buscamos a los infractores
+      
         List<Recordatori> recordatoriosOlvidados = recordatoriRepository
                 .findByDataHoraBeforeAndCompletatFalseAndPenalitzatFalse(ahora);
 
-        // 2. Aplicamos el castigo uno por uno
+     
         for (Recordatori rec : recordatoriosOlvidados) {
             Usuari usuari = rec.getUsuari();
 

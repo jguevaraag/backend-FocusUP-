@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "grup_usuaris")
 @Data
@@ -12,11 +14,13 @@ public class GrupUsuari {
     @EmbeddedId
     private GrupUsuariID id = new GrupUsuariID();
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("grupId") // Conecta con la clave compuesta
     @JoinColumn(name = "grup_id")
     private Grup grup;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("usuariId") // Conecta con la clave compuesta
     @JoinColumn(name = "usuari_id")
