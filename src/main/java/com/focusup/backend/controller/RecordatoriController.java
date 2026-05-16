@@ -84,20 +84,12 @@ public class RecordatoriController {
             @PathVariable Long id, 
             @RequestBody Map<String, Boolean> request) {
             
-        // 1. Buscamos el recordatorio en la BBDD
         Recordatori recordatori = recordatoriRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Recordatorio no encontrado"));
 
-        // (Opcional pero recomendado): Comprobar que el recordatorio pertenece al usuario logueado
-        // String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        // if(!recordatori.getUsuari().getUsername().equals(username)) { throw new RuntimeException("No autorizado"); }
-
-        // 2. Extraemos el valor "completat" del JSON que envía Marco
         if (request.containsKey("completat")) {
             recordatori.setCompletat(request.get("completat"));
         }
-
-        // 3. Guardamos y devolvemos
         Recordatori actualizado = recordatoriRepository.save(recordatori);
         return ResponseEntity.ok(actualizado);
     }

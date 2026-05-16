@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface GrupUsuariRepository extends JpaRepository<GrupUsuari, GrupUsuariID> {
     List<GrupUsuari> findByUsuari(Usuari usuari);
-    boolean existsByUsuariAndGrupId(Usuari usuari, Long grupId); // Para evitar que se unan 2 veces
+    boolean existsByUsuariAndGrupId(Usuari usuari, Long grupId);
 
     @Query("SELECT gu.usuari FROM GrupUsuari gu WHERE gu.grup.id = :grupId ORDER BY gu.usuari.punts DESC")
     List<Usuari> findRankingByGrupId(@Param("grupId") Long grupId);

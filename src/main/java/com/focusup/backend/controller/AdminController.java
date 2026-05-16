@@ -13,7 +13,6 @@ public class AdminController {
     @Autowired
     private ItemRepository itemRepository;
 
-    // Crear item(solo para admins).
     @PostMapping("/items")
     public ResponseEntity<Item> crearItem(@RequestBody Item item) {
         Item nuevoItem = itemRepository.save(item);

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <--- ESTO EVITA EL ERROR 500
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "grups")
 @Data

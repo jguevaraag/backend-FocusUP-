@@ -21,13 +21,13 @@ public class GrupUsuari {
     @ToString.Exclude   
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("grupId") // Conecta con la clave compuesta
+    @MapsId("grupId")
     @JoinColumn(name = "grup_id")
     private Grup grup;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId("usuariId") // Conecta con la clave compuesta
+    @MapsId("usuariId")
     @JoinColumn(name = "usuari_id")
     private Usuari usuari;
 

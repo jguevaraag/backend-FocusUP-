@@ -30,7 +30,7 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager; // Comprobador de credenciales.
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtService jwtService;
@@ -47,7 +47,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registrarUsuario(@Valid @RequestBody RegistroRequest request) {
 
-        // Comprobamos si el usuario ya existe.
         if (usuariRepository.existsByUsername(request.getUsername())) {
             return ResponseEntity.badRequest().body("Error: El nombre de usuario ya está en uso");
         }
@@ -56,7 +55,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: El email ya está registrado");
         }
 
-        // Creamos el Usuario.
         Usuari nuevoUsuario = new Usuari();
         nuevoUsuario.setUsername(request.getUsername());
         nuevoUsuario.setNom(request.getNom());
@@ -64,11 +62,9 @@ public class AuthController {
         nuevoUsuario.setEmail(request.getEmail());
         nuevoUsuario.setDataNaixement(request.getDataNaixement());
 
-        // Encriptamos la contraseña antes de guardar.
         nuevoUsuario.setPassword(passwordEncoder.encode(request.getPassword()));
         nuevoUsuario.setRol(Role.USER);
 
-        // Guardamos en la Base de Datos.
         usuariRepository.save(nuevoUsuario);
 
         return ResponseEntity.ok("¡Usuario registrado con éxito!");
@@ -80,7 +76,6 @@ public class AuthController {
         String username = requestPayload.get("username");
         String password = requestPayload.get("password");
         
-        // Obtenemos la IP de la petición (Flutter)
         String ipAddress = request.getRemoteAddr();
 
         Usuari usuario = usuariRepository.findByUsername(username).orElse(null);
@@ -90,7 +85,7 @@ public class AuthController {
         }
 
         if (usuario.isBloqueado()) {
-            // Guardamos el registro como intento FALLIDO (porque está bloqueado)
+            
             registroSesionRepository.save(new RegistroSesion(null,usuario, ipAddress, LocalDateTime.now(), false));
             return ResponseEntity.status(403).body(Map.of("error", "Cuenta bloqueada."));
         }
@@ -104,7 +99,7 @@ public class AuthController {
             }
             usuariRepository.save(usuario);
             
-            // Guardamos el registro como intento FALLIDO (contraseña incorrecta)
+            
             registroSesionRepository.save(new RegistroSesion(null, usuario, ipAddress, LocalDateTime.now(), false));
             
             return ResponseEntity.status(401).body(Map.of(
@@ -112,17 +107,14 @@ public class AuthController {
             ));
         }
 
-        // --- SI LLEGAMOS AQUÍ, EL LOGIN ES CORRECTO ---
         if (usuario.getIntentosFallidos() > 0) {
             usuario.setIntentosFallidos(0);
             usuariRepository.save(usuario);
         }
 
-        // Guardamos el registro como intento EXITOSO
         registroSesionRepository.save(new RegistroSesion(null, usuario, ipAddress, LocalDateTime.now(), true));
 
-        // Generamos Token (tu código JWT)
-        String token = jwtService.generateToken(usuario.getUsername()); 
+        String token = jwtService.generateToken(usuario.getUsername());
 
         return ResponseEntity.ok(Map.of(
                 "mensaje", "Login exitoso",

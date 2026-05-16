@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,42 @@ public class BotigaController {
     private InventariRepository inventariRepository;
 
     @GetMapping
-    public ResponseEntity<List<Item>> obtenerItemsTienda() {
-        List<Item> items = itemRepository.findAll();
-        return ResponseEntity.ok(items);
+    public ResponseEntity<List<Map<String, Object>>> obtenerItemsTienda(Principal principal) {
+        
+        Usuari usuari = usuariRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        List<Item> todosLosItems = itemRepository.findAll();
+        List<Inventari> miInventario = inventariRepository.findByUsuariId(usuari.getId());
+
+        List<Map<String, Object>> respuesta = new ArrayList<>();
+
+        for (Item item : todosLosItems) {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", item.getId());
+            dto.put("nom", item.getNom());
+            dto.put("descripcio", item.getDescripcio());
+            dto.put("preu", item.getPreu());
+            dto.put("tipus", item.getTipus());
+
+            boolean comprat = false;
+            boolean equipat = false;
+
+            for (Inventari inv : miInventario) {
+                if (inv.getItem().getId().equals(item.getId())) {
+                    comprat = true;
+                    equipat = inv.getEquipado() != null ? inv.getEquipado() : false; 
+                    break;
+                }
+            }
+
+            dto.put("comprat", comprat);
+            dto.put("equipat", equipat);
+            
+            respuesta.add(dto);
+        }
+
+        return ResponseEntity.ok(respuesta);
     }
 
     @PostMapping("/comprar/{itemId}")
@@ -50,16 +84,13 @@ public class BotigaController {
         Optional<Inventari> inventariExistente = inventariRepository.findByUsuariIdAndItemId(usuari.getId(), item.getId());
         
         if (inventariExistente.isPresent()) {
-            // Devolvemos un JSON de error
             return ResponseEntity.badRequest().body(Map.of("error", "Ya tienes este item en tu inventario"));
         }
 
         if (usuari.getPunts() < item.getPreu()) {
-            // Devolvemos un JSON de error
             return ResponseEntity.badRequest().body(Map.of("error", "No tienes suficientes puntos para comprar este item"));
         }
 
-        // Transacción
         usuari.setPunts(usuari.getPunts() - item.getPreu());
         usuariRepository.save(usuari);
 
@@ -70,7 +101,6 @@ public class BotigaController {
         nuevoInventari.setEquipado(false);
         inventariRepository.save(nuevoInventari);
 
-        // AQUÍ LA MAGIA: Le devolvemos un mensaje y el nuevo saldo en un JSON
         Map<String, Object> response = new HashMap<>();
         response.put("mensaje", "Item comprado correctamente");
         response.put("nouSaldo", usuari.getPunts());

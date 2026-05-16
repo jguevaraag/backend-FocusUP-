@@ -53,28 +53,24 @@ public class SessioEstudiController {
         sesion.setDataInici(ahora.minusMinutes(request.getMinuts()));
         sesion.setUsuari(usuario);
 
-        // --- LÓGICA DE INTEGRACIÓN CON RECORDATORIOS ---
         if (request.getRecordatoriId() != null) {
             Recordatori rec = recordatoriRepository.findById(request.getRecordatoriId()).orElse(null);
 
-            // Verificamos que el recordatorio exista y pertenezca al usuario logueado
             if (rec != null && rec.getUsuari().getId().equals(usuario.getId())) {
-                sesion.setRecordatori(rec); // Enlazamos la sesión al recordatorio
-                rec.setCompletat(true); // Lo marcamos como hecho
+                sesion.setRecordatori(rec);
+                rec.setCompletat(true);
                 recordatoriRepository.save(rec);
             }
         }
 
         sessioRepository.save(sesion);
 
-        // Actualizamos puntos y experiencia (1.5 puntos por minuto para incentivar)
         int puntosGanados = (int) (request.getMinuts() * 1.5);
         usuario.setPunts(usuario.getPunts() + puntosGanados);
         usuario.setAssolimentsTotals(usuario.getAssolimentsTotals() + puntosGanados);
 
         usuariRepository.save(usuario);
 
-        // Devolvemos un JSON completo para el Frontend
         Map<String, Object> response = new HashMap<>();
         response.put("mensaje", "Sesión guardada correctamente");
         response.put("puntosGanados", puntosGanados);

@@ -33,13 +33,10 @@ public class CastigoService {
             Usuari usuari = rec.getUsuari();
 
             int puntosActuales = usuari.getPunts();
-            int puntosDeMulta = 10; // Le quitamos 10 puntos por tarea olvidada
+            int puntosDeMulta = 10;
 
-            // Usamos Math.max para que si tiene 5 puntos, no se quede en -5 (se queda en 0)
             usuari.setPunts(Math.max(0, puntosActuales - puntosDeMulta));
             usuariRepository.save(usuari);
-
-            // 3. Marcamos la tarea como "multada" para no volver a cobrarle mañana
             rec.setPenalitzat(true);
             recordatoriRepository.save(rec);
         }

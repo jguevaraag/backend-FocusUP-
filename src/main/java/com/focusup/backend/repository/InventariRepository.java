@@ -10,10 +10,8 @@ import java.util.Optional;
 
 public interface InventariRepository extends JpaRepository<Inventari, Long> {
 
-    
     List<Inventari> findByUsuariId(Long usuariId);
 
-    // Ver si el usuario YA tiene un item específico (Para que no lo compre dos veces).
     Optional<Inventari> findByUsuariIdAndItemId(Long usuariId, Long itemId);
     
     @Query("SELECT i FROM Inventari i WHERE i.usuari.id = :usuariId AND i.item.tipus = :tipus AND i.equipado = true")

@@ -22,18 +22,17 @@ public class Recordatori {
     @Column(name = "completat")
     private boolean completat = false;
 
-    // NUEVO: Para evitar quitarle puntos todas las noches por la misma tarea
     @Column(name = "penalitzat")
-    private boolean penalitzat = false; 
+    private boolean penalitzat = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuari_id", nullable = false)
     @JsonIgnore
     private Usuari usuari;
 
-        @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "grup_id")
-    @JsonIgnore // Evita recursión
+    @JsonIgnore
     private Grup grup;
     
 }

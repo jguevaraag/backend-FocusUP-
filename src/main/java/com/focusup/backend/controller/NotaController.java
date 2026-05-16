@@ -34,11 +34,9 @@ public class NotaController {
 
     @GetMapping
     public ResponseEntity<List<Nota>> obtenerMisNotas(Principal principal) {
-        // Buscamos al usuario que está haciendo la petición.
         Usuari usuario = usuariRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Devolvemos solo SUS notas.
         List<Nota> notas = notaRepository.findByUsuariId(usuario.getId());
         return ResponseEntity.ok(notas);
     }
@@ -48,11 +46,9 @@ public class NotaController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             Principal principal) {
         
-        
         Usuari usuario = usuariRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        
         List<Nota> notasDelDia = notaRepository.findByDataAndUsuariId(fecha, usuario.getId());
         
         return ResponseEntity.ok(notasDelDia);
@@ -60,23 +56,19 @@ public class NotaController {
 
     @PostMapping
     public ResponseEntity<?> crearNota(@RequestBody NotaRequest request, Principal principal) {
-        // Buscamos al usuario dueño del token.
         Usuari usuario = usuariRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Creamos la nota
         Nota nuevaNota = new Nota();
         nuevaNota.setTitol(request.getTitol());
         nuevaNota.setContingut(request.getContingut());
         
-        // Si nos envían fecha, la usamos. Si no, ponemos la de hoy.
         if (request.getData() != null) {
             nuevaNota.setData(request.getData());
         } else {
             nuevaNota.setData(LocalDate.now());
         }
 
-        // Asignamos el usuario a la nota.
         nuevaNota.setUsuari(usuario);
 
         notaRepository.save(nuevaNota);

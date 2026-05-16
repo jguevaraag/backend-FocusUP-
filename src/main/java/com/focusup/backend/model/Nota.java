@@ -25,11 +25,9 @@ public class Nota {
     @Column(columnDefinition = "TEXT") 
     private String contingut;
 
-    
     @Column(name = "data") 
-    private LocalDate data; 
+    private LocalDate data;
 
-    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuari_id", nullable = false)
     @JsonIgnore
@@ -39,9 +37,9 @@ public class Nota {
     @JoinColumn(name = "sessio_id")
     private SessioEstudi sessioEstudi;
 
-        @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "grup_id")
-    @JsonIgnore // Evita recursión
+    @JsonIgnore
     private Grup grup;
     
 }

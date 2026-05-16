@@ -15,12 +15,12 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // <--- ESTO EVITA EL ERROR 500
-@Data // Genera getters, setters, toString, etc. automáticamente
-@NoArgsConstructor // Constructor vacío (necesario para JPA)
-@AllArgsConstructor // Constructor con todos los argumentos
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "usuaris") // Coincide con tu tabla SQL
+@Table(name = "usuaris")
 
 public class Usuari implements UserDetails {
     @Id

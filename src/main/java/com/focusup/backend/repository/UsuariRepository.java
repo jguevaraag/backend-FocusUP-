@@ -9,9 +9,8 @@ import com.focusup.backend.model.Usuari;
 
 @Repository
 public interface UsuariRepository extends JpaRepository<Usuari, Long> {
-        Optional<Usuari> findByUsername(String username);
+    Optional<Usuari> findByUsername(String username);
 
-    // Para comprobar duplicados antes de guardar.
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 }
