@@ -52,4 +52,17 @@ public class InventariController {
                 "tipo", tipoItem
         ));
     }
+    @PostMapping("/desequipar/{itemId}")
+    public ResponseEntity<?> desequiparItem(@PathVariable Long itemId, Principal principal) {
+        
+        Usuari usuari = usuariRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Inventari inventarioItem = inventariRepository.findByUsuariIdAndItemId(usuari.getId(), itemId)
+                .orElseThrow(() -> new RuntimeException("No tienes este objeto en tu inventario"));
+        inventarioItem.setEquipado(false);
+        inventariRepository.save(inventarioItem);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Objeto desequipado"));
+    }
 }
